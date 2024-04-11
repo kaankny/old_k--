@@ -14,9 +14,12 @@ typedef enum ASTNodeType
 	AST_FUNCTION_DEFINITION,
 	AST_FUNCTION_CALL,
 	AST_VARIABLE_ASSIGNMENT,
+	AST_EQUAL,
+	AST_IF,
 	AST_STRING,
 	AST_NUMBER,
 	AST_FLOAT,
+	AST_BOOLEAN,
 	AST_COMPOUND
 }	ASTNodeType;
 
@@ -51,6 +54,15 @@ typedef struct ASTNode
 
 	struct ASTNode	**compound_value;
 	unsigned int	compound_value_count;
+
+	int				boolean;
+
+	struct ASTNode	*equal_left;
+	struct ASTNode	*equal_right;
+
+	struct ASTNode	*if_condition;
+	struct ASTNode	*else_body;
+	struct ASTNode	*if_body;
 }	ASTNode;
 
 ASTNode	*ast_init(ASTNodeType type);

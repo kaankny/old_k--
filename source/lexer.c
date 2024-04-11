@@ -165,6 +165,12 @@ Token	*lexer_tokenize(const char *source)
 					lexer_add_token(&tokens, TOKEN_TYPE_KEYWORD_VAR, buffer, 0, 0, '\0', length, line, column);
 				else if (strcmp(buffer, "func") == 0)
 					lexer_add_token(&tokens, TOKEN_TYPE_KEYWORD_FUNC, buffer, 0, 0, '\0', length, line, column);
+				else if (strcmp(buffer, "if") == 0)
+					lexer_add_token(&tokens, TOKEN_TYPE_KEYWORD_IF, buffer, 0, 0, '\0', length, line, column);
+				else if (strcmp(buffer, "else") == 0)
+					lexer_add_token(&tokens, TOKEN_TYPE_KEYWORD_ELSE, buffer, 0, 0, '\0', length, line, column);
+				else if (strcmp(buffer, "elseif") == 0)
+					lexer_add_token(&tokens, TOKEN_TYPE_KEYWORD_ELSE_IF, buffer, 0, 0, '\0', length, line, column);
 				else if (strcmp(buffer, "char") == 0)
 					lexer_add_token(&tokens, TOKEN_TYPE_KEYWORD_CHAR, buffer, 0, 0, '\0', length, line, column);
 				else if (strcmp(buffer, "int") == 0)
@@ -173,6 +179,12 @@ Token	*lexer_tokenize(const char *source)
 					lexer_add_token(&tokens, TOKEN_TYPE_KEYWORD_FLOAT, buffer, 0, 0, '\0', length, line, column);
 				else if (strcmp(buffer, "string") == 0)
 					lexer_add_token(&tokens, TOKEN_TYPE_KEYWORD_STRING, buffer, 0, 0, '\0', length, line, column);
+				else if (strcmp(buffer, "bool") == 0)
+					lexer_add_token(&tokens, TOKEN_TYPE_KEYWORD_BOOL, buffer, 0, 0, '\0', length, line, column);
+				else if (strcmp(buffer, "true") == 0)
+					lexer_add_token(&tokens, TOKEN_TYPE_BOOL, buffer, 1, 0, '\0', length, line, column);
+				else if (strcmp(buffer, "false") == 0)
+					lexer_add_token(&tokens, TOKEN_TYPE_BOOL, buffer, 0, 0, '\0', length, line, column);
 				else
 					lexer_add_token(&tokens, TOKEN_TYPE_IDENTIFIER, buffer, 0, 0, '\0', length, line, column);
 			}
@@ -262,9 +274,18 @@ Token	*lexer_tokenize(const char *source)
 			}
 			else if (source[i] == '=')
 			{
-				lexer_add_token(&tokens, TOKEN_TYPE_ASSIGN, "=", 0, 0, '\0', 1, line, column);
-				i++;
-				column++;
+				if (source[i + 1] == '=')
+				{
+					lexer_add_token(&tokens, TOKEN_TYPE_EQUAL, "==", 0, 0, '\0', 2, line, column);
+					i += 2;
+					column += 2;
+				}
+				else
+				{
+					lexer_add_token(&tokens, TOKEN_TYPE_ASSIGN, "=", 0, 0, '\0', 1, line, column);
+					i++;
+					column++;
+				}
 			}
 			else if (source[i] == ',')
 			{

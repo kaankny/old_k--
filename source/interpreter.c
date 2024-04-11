@@ -22,14 +22,21 @@ ASTNode *interpreter_visit_variable(Interpreter *interpreter, ASTNode *node)
 
 static ASTNode *builtim_function_input(Interpreter *interpreter, ASTNode *node)
 {
-	char *input = (char *)calloc(sizeof(char), 1024);
-	scanf("%s", input);
 	for(int i = 0; i < node->scope->variable_definitions_count; i++)
 	{
 		ASTNode *variable_definition = node->scope->variable_definitions[i];
 		if (strcmp(variable_definition->variable_defination_variable_name, node->function_call_arguments[0]->variable_name) == 0)
 		{
-			variable_definition->variable_defination_value = ast_init(AST_STRING);
+			if (variable_definition->variable_defination_variable_type != TOKEN_TYPE_STRING)
+			{
+				start_print_error();
+				printf("Invalid input type: %s\n", variable_definition->variable_defination_variable_name);
+				end_print_error();
+				free_memory();
+				exit(1);
+			}
+			char *input = (char *)calloc(sizeof(char), 1024);
+			scanf("%s", input);
 			variable_definition->variable_defination_value->string = input;
 			return (ast_init(AST_NOOP));
 		}
@@ -55,6 +62,8 @@ static ASTNode *builtin_function_print(Interpreter *interpreter, ASTNode *node)
 				printf("%s ", value->string);
 			else if (value->type == AST_NUMBER)
 				printf("%d ", value->number);
+			else if (value->type == AST_BOOLEAN)
+				printf("%s ", value->boolean ? "true" : "false");
 			else
 			{
 				start_print_error();
@@ -99,7 +108,7 @@ ASTNode *interpreter_visit_function_call(Interpreter *interpreter, ASTNode *node
 {
 	if (strcmp(node->function_call_name, "print") == 0)
 		return (builtin_function_print(interpreter, node));
-	if (strcmp(node->function_call_name, "println") == 0)
+	else if (strcmp(node->function_call_name, "println") == 0)
 	{
 		builtin_function_print(interpreter, node);
 		printf("\n");
@@ -154,6 +163,7 @@ ASTNode *interpreter_visit_variable_assignment(Interpreter *interpreter, ASTNode
 	ASTNode *variable_definition = scope_get_variable_definition(node->scope, node->variable_assignment_variable_name);
 	if (variable_definition)
 	{
+		/*
 		if (variable_definition->variable_defination_variable_type != node->variable_assignment_variable_type)
 		{
 			start_print_error();
@@ -162,6 +172,7 @@ ASTNode *interpreter_visit_variable_assignment(Interpreter *interpreter, ASTNode
 			free_memory();
 			exit(1);
 		}
+		*/
 		ASTNode *value = interpreter_visit(interpreter, node->variable_assignment_value);
 		variable_definition->variable_defination_value = value;
 		return (ast_init(AST_NOOP));
@@ -172,6 +183,89 @@ ASTNode *interpreter_visit_variable_assignment(Interpreter *interpreter, ASTNode
 	free_memory();
 	exit(1);
 	return (NULL);
+}
+
+ASTNode *interpreter_visit_if(Interpreter *interpreter, ASTNode *node)
+{
+	ASTNode *condition = interpreter_visit(interpreter, node->if_condition);
+	if (condition->type != AST_BOOLEAN && condition->type != AST_EQUAL)
+	{
+		start_print_error();
+		printf("Invalid condition type: %d\n", condition->type);
+		end_print_error();
+		free_memory();
+		exit(1);
+	}
+	if (condition->type == AST_EQUAL)
+	{
+		if (condition->equal_left->type == AST_NUMBER && condition->equal_right->type == AST_NUMBER)
+		{
+			condition->boolean = condition->equal_left->number == condition->equal_right->number;
+		}
+		else if (condition->equal_left->type == AST_FLOAT && condition->equal_right->type == AST_FLOAT)
+		{
+			condition->boolean = condition->equal_left->float_number == condition->equal_right->float_number;
+		}
+		else if (condition->equal_left->type == AST_STRING && condition->equal_right->type == AST_STRING)
+		{
+			condition->boolean = strcmp(condition->equal_left->string, condition->equal_right->string) == 0;
+		}
+		else if (condition->equal_left->type == AST_BOOLEAN && condition->equal_right->type == AST_BOOLEAN)
+		{
+			condition->boolean = condition->equal_left->boolean == condition->equal_right->boolean;
+		}
+		else if (condition->equal_left->type == AST_VARIABLE)
+		{
+			ASTNode *variable_definition = scope_get_variable_definition(node->scope, condition->equal_left->variable_name);
+			if (variable_definition)
+			{
+				if (variable_definition->variable_defination_variable_type == TOKEN_TYPE_NUMBER && condition->equal_right->type == AST_NUMBER)
+				{
+					condition->boolean = variable_definition->variable_defination_value->number == condition->equal_right->number;
+				}
+				else if (variable_definition->variable_defination_variable_type == TOKEN_TYPE_FLOAT && condition->equal_right->type == AST_FLOAT)
+				{
+					condition->boolean = variable_definition->variable_defination_value->float_number == condition->equal_right->float_number;
+				}
+				else if (variable_definition->variable_defination_variable_type == TOKEN_TYPE_STRING && condition->equal_right->type == AST_STRING)
+				{
+					condition->boolean = strcmp(variable_definition->variable_defination_value->string, condition->equal_right->string) == 0;
+				}
+				else if (variable_definition->variable_defination_variable_type == TOKEN_TYPE_BOOL && condition->equal_right->type == AST_BOOLEAN)
+				{
+					condition->boolean = variable_definition->variable_defination_value->boolean == condition->equal_right->boolean;
+				}
+				else
+				{
+					start_print_error();
+					printf("Invalid condition type: %d %d\n", variable_definition->variable_defination_variable_type, condition->equal_right->type);
+					end_print_error();
+					free_memory();
+					exit(1);
+				}
+			}
+			else
+			{
+				start_print_error();
+				printf("Variable not found: %s\n", condition->equal_left->variable_name);
+				end_print_error();
+				free_memory();
+				exit(1);
+			}
+		}
+		else
+		{
+			start_print_error();
+			printf("Invalid condition type: %d %d\n", condition->equal_left->type, condition->equal_right->type);
+			end_print_error();
+			free_memory();
+			exit(1);
+		}
+	}
+	if (condition->boolean)
+		return (interpreter_visit(interpreter, node->if_body));
+	else
+		return (interpreter_visit(interpreter, node->else_body));
 }
 
 ASTNode *interpreter_visit(Interpreter *interpreter, ASTNode *node)
@@ -188,9 +282,15 @@ ASTNode *interpreter_visit(Interpreter *interpreter, ASTNode *node)
 		return (interpreter_function_defination(interpreter, node));
 	else if (type == AST_VARIABLE_ASSIGNMENT)
 		return (interpreter_visit_variable_assignment(interpreter, node));
+	else if (type == AST_IF)
+		return (interpreter_visit_if(interpreter, node));
 	else if (type == AST_STRING)
 		return (interpreter_visit_string(interpreter, node));
+	else if (type == AST_EQUAL)
+		return (node);
 	else if (type == AST_FLOAT)
+		return (node);
+	else if (type == AST_BOOLEAN)
 		return (node);
 	else if (type == AST_COMPOUND)
 		return (interpreter_visit_compound(interpreter, node));

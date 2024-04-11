@@ -1,16 +1,13 @@
-func printWelcome(str)
+var string password;
+print: "Enter password for enter the program: ";
+input: password;
+println: "You entered: ", password;
+var bool isPasswordCorrect = false;
+if (password == "kaan")
 {
-	println: "Welcome ", str;
+	println: "True Password";
+}
+else
+{
+	println: "Wrong Password";
 };
-
-var string name;
-print: "enter your name: ";
-input: name;
-printWelcome: name;
-var int age;
-print: "enter your age: ";
-input: age;
-println: "Wow your age is", age;
-var string surname = "Hello World";
-surname = "kanyilmaz";
-println: "Your surname setted to : ", surname;

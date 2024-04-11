@@ -6,6 +6,7 @@
 #include "../include/memory.h"
 #include "../include/utils.h"
 #include "../include/scope.h"
+#include <string.h>
 
 Parser	*parser_init(Token *tokens)
 {
@@ -42,12 +43,53 @@ ASTNode *parser_parse_variable_assignment(Parser *parser, Scope *scope)
 	return (ast_variable_assignment);
 }
 
+ASTNode	*parser_parse_equal(Parser *parser, Scope *scope)
+{
+	ASTNode *ast_equal = ast_init(AST_EQUAL);
+	if (parser->current_token->type == TOKEN_TYPE_IDENTIFIER)
+	{
+		ast_equal->equal_left = ast_init(AST_VARIABLE);
+		ast_equal->equal_left->variable_name = parser->current_token->string_content;
+		parser_advance(parser, TOKEN_TYPE_IDENTIFIER);
+	}
+	else if (parser->current_token->type == TOKEN_TYPE_STRING)
+	{
+		ast_equal->equal_left = ast_init(AST_STRING);
+		ast_equal->equal_left->string = parser->current_token->string_content;
+		parser_advance(parser, TOKEN_TYPE_STRING);
+	}
+	else if (parser->current_token->type == TOKEN_TYPE_NUMBER)
+	{
+		ast_equal->equal_left = ast_init(AST_NUMBER);
+		ast_equal->equal_left->number = parser->current_token->int_content;
+		parser_advance(parser, TOKEN_TYPE_NUMBER);
+	}
+	else if (parser->current_token->type == TOKEN_TYPE_FLOAT)
+	{
+		ast_equal->equal_left = ast_init(AST_FLOAT);
+		ast_equal->equal_left->float_number = parser->current_token->float_content;
+		parser_advance(parser, TOKEN_TYPE_FLOAT);
+	}
+	else if (parser->current_token->type == TOKEN_TYPE_BOOL)
+	{
+		ast_equal->equal_left = ast_init(AST_BOOLEAN);
+		ast_equal->equal_left->boolean = parser->current_token->int_content;
+		parser_advance(parser, TOKEN_TYPE_BOOL);
+	}
+	parser_advance(parser, TOKEN_TYPE_EQUAL);
+	ast_equal->equal_right = parser_parse_expression(parser, parser->current_token->type, scope);
+	ast_equal->scope = scope;
+	return (ast_equal);
+}
+
 ASTNode	*parser_parse_variable(Parser *parser, TokenType type, Scope *scope)
 {
 	if (parser->current_token->next->type == TOKEN_TYPE_COLON)
 		return (parser_parse_funcation_call(parser, scope));
 	else if (parser->current_token->next->type == TOKEN_TYPE_ASSIGN)
 		return (parser_parse_variable_assignment(parser, scope));
+	else if (parser->current_token->next->type == TOKEN_TYPE_EQUAL)
+		return (parser_parse_equal(parser, scope));
 	ASTNode *ast_variable = ast_init(AST_VARIABLE);
 	ast_variable->variable_name = parser->current_token->string_content;
 	if (parser->current_token->type == TOKEN_TYPE_IDENTIFIER)
@@ -70,6 +112,8 @@ ASTNode	*parser_parse_string(Parser *parser, Scope *scope)
 
 ASTNode	*parser_parse_number(Parser *parser, Scope *scope)
 {
+	if (parser->current_token->next->type == TOKEN_TYPE_EQUAL)
+		return (parser_parse_equal(parser, scope));
 	ASTNode *ast_number = ast_init(AST_NUMBER);
 	ast_number->number = parser->current_token->int_content;
 	parser_advance(parser, TOKEN_TYPE_NUMBER);
@@ -86,6 +130,15 @@ ASTNode	*parser_parse_float(Parser *parser, Scope *scope)
 	return (ast_float);
 }
 
+ASTNode	*parser_parse_boolean(Parser *parser, Scope *scope)
+{
+	ASTNode *ast_boolean = ast_init(AST_BOOLEAN);
+	ast_boolean->boolean = parser->current_token->int_content;
+	parser_advance(parser, TOKEN_TYPE_BOOL);
+	ast_boolean->scope = scope;
+	return (ast_boolean);
+}
+
 ASTNode	*parser_parse_expression(Parser *parser, TokenType type, Scope *scope)
 {
 	if (type == TOKEN_TYPE_IDENTIFIER)
@@ -96,6 +149,8 @@ ASTNode	*parser_parse_expression(Parser *parser, TokenType type, Scope *scope)
 		return (parser_parse_number(parser, scope));
 	else if (type == TOKEN_TYPE_FLOAT)
 		return (parser_parse_float(parser, scope));
+	else if (type == TOKEN_TYPE_BOOL)
+		return (parser_parse_boolean(parser, scope));
 	return (ast_init(AST_NOOP));
 }
 
@@ -170,6 +225,34 @@ ASTNode	*parser_parse_function_definition(Parser *parser, Scope *scope)
 	return (ast_function_definition);
 }
 
+ASTNode	*parser_parse_if(Parser *parser, Scope *scope)
+{
+	parser_advance(parser, TOKEN_TYPE_KEYWORD_IF);
+	ASTNode *ast_if = ast_init(AST_IF);
+	parser_advance(parser, TOKEN_TYPE_OPEN_PAREN);
+	ast_if->if_condition = parser_parse_expression(parser, parser->current_token->type, scope);
+	parser_advance(parser, TOKEN_TYPE_CLOSE_PAREN);
+	parser_advance(parser, TOKEN_TYPE_OPEN_BRACE);
+	ast_if->if_body = parser_parse_statements(parser, scope);
+	parser_advance(parser, TOKEN_TYPE_CLOSE_BRACE);
+	if (parser->current_token->type == TOKEN_TYPE_KEYWORD_ELSE)
+	{
+		parser_advance(parser, TOKEN_TYPE_KEYWORD_ELSE);
+		if (parser->current_token->type == TOKEN_TYPE_KEYWORD_IF)
+			ast_if->else_body = parser_parse_if(parser, scope);
+		else
+		{
+			parser_advance(parser, TOKEN_TYPE_OPEN_BRACE);
+			ast_if->else_body = parser_parse_statements(parser, scope);
+			parser_advance(parser, TOKEN_TYPE_CLOSE_BRACE);
+		}
+	}
+	else
+		ast_if->else_body = ast_init(AST_NOOP);
+	ast_if->scope = scope;
+	return (ast_if);
+}
+
 ASTNode	*parser_parse_statement(Parser *parser, Scope *scope)
 {
 	TokenType type = parser->current_token->type;
@@ -179,6 +262,8 @@ ASTNode	*parser_parse_statement(Parser *parser, Scope *scope)
 		return (parser_parse_function_definition(parser, scope));
 	else if (type == TOKEN_TYPE_IDENTIFIER)
 		return (parser_parse_variable(parser, type, scope));
+	else if (type == TOKEN_TYPE_KEYWORD_IF)
+		return (parser_parse_if(parser, scope));
 	return (ast_init(AST_NOOP));
 }
 

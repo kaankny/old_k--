@@ -1,6 +1,8 @@
 #ifndef LEXER_H
 # define LEXER_H
 
+#include <stdbool.h>
+
 /*
 ** TOKEN TYPE ENUMERATION
 */
@@ -68,10 +70,15 @@ typedef enum {
 	// Keywords
 	TOKEN_TYPE_KEYWORD_VAR, 		// var
 	TOKEN_TYPE_KEYWORD_FUNC, 		// func
+	TOKEN_TYPE_KEYWORD_IF, 			// if
+	TOKEN_TYPE_KEYWORD_ELSE_IF, 	// else if
+	TOKEN_TYPE_KEYWORD_ELSE, 		// else
 	TOKEN_TYPE_STRING, 				// String literal
 	TOKEN_TYPE_KEYWORD_STRING, 		// string
 	TOKEN_TYPE_CHAR, 				// Character literal (single character)
 	TOKEN_TYPE_KEYWORD_CHAR, 		// char
+	TOKEN_TYPE_BOOL, 				// Boolean literal (true or false)
+	TOKEN_TYPE_KEYWORD_BOOL, 		// bool
 	TOKEN_TYPE_NUMBER, 				// Number literal (integer)
 	TOKEN_TYPE_KEYWORD_INT, 		// int
 	TOKEN_TYPE_FLOAT, 				// Number literal (float)
