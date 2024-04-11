@@ -26,6 +26,7 @@ Using k-- is quite simple. First, compile the source code. Then, using a text ed
 var string name = "kaan"; // declaring a variable of type string
 var string surname; // declaring a variable of type string
 var int age = 19; // declaring a variable of type string
+var bool isHungry = true; // declaring a variable of type bool
 ```
 
 ### Variable Substitution
@@ -53,5 +54,25 @@ print: "hello world";
 func example(x)
 {
   println: x;
+};
+```
+
+### If/Else Statement
+```
+// if ( condition )
+// {
+// }
+// else
+// {
+// }
+
+var int x = 10;
+if (x == 10)
+{
+  println: "x is 10";
+}
+else
+{
+  println: "x is not 10";
 };
 ```
