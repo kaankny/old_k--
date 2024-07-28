@@ -1,65 +1,69 @@
-# K-- (Programing Language)
+<h1>K-- (Programming Language)</h1>
 
-k-- is a lightweight and flexible interpreter language. It has its own special syntax and the ability to define variables and functions. There are also standard functions available for use in the project, including basic functions like `print`, `println` and `input`.
+<h2>Project Overview</h2>
+<p><code>K--</code> is a lightweight and flexible interpreted programming language. It features its own unique syntax and supports the definition of variables and functions. Additionally, it includes a variety of standard functions such as <code>print</code>, <code>println</code>, and <code>input</code>, making it easy to start coding right away.</p>
 
+<h2>Features</h2>
+<ul>
+    <li><strong>Flexibility:</strong> K-- is extensible and modifiable, allowing you to tailor the language to suit your project's specific needs.</li>
+    <li><strong>Standard Functions:</strong> Includes ready-to-use standard functions for immediate development.</li>
+    <li><strong>Lightweight:</strong> With its minimalist design and low memory consumption, K-- is a fast and efficient interpreter.</li>
+    <li><strong>Custom Syntax:</strong> Offers a unique syntax that is simple yet powerful.</li>
+</ul>
 
-## Features
+<h2>Getting Started</h2>
+<p>To start using K--, follow these steps:</p>
+<ol>
+    <li>Compile the source code:</li>
+    <pre><code>gcc -o kaan k_interpreter.c</code></pre>
+    <li>Create your K-- script using a text editor and save it with a <code>.k</code> extension. For example, <code>example.k</code>.</li>
+    <li>Run the script using the following command:</li>
+    <pre><code>./kaan example.k</code></pre>
+</ol>
 
-- **Flexibility:** K-- language is extensible and modifiable, so you can customize it to suit your project.
-- **Standard Functions:** With ready-made standard functions, you can start using it immediately.
-- **Lightweight:** With its minimalist design and low memory consumption, it is a fast and efficient interpreter.
+<h2>Example Usage</h2>
 
-## How use?
+<h3>Variable Definition</h3>
+<p>Variables can be defined with types such as <code>string</code>, <code>int</code>, and <code>bool</code>:</p>
+<pre><code>// var type variable_name = variable_value ;
 
-Using k-- is quite simple. First, compile the source code. Then, using a text editor, write the Ghost Language codes and save them in a file with the extension ".k". Finally, run this command from the terminal or command client:
+var string name = "kaan";    // defining a string variable
+var string surname;          // declaring a string variable
+var int age = 19;            // defining an integer variable
+var bool isHungry = true;    // defining a boolean variable
+</code></pre>
 
-```
-./kaan example.k
-```
-
-## Example Usage
-
-### Variable Defination
-```
-// var type variable_name = variable_value ;
-
-var string name = "kaan"; // declaring a variable of type string
-var string surname; // declaring a variable of type string
-var int age = 19; // declaring a variable of type string
-var bool isHungry = true; // declaring a variable of type bool
-```
-
-### Variable Substitution
-```
-// variable_name = variable_value ;
+<h3>Variable Assignment</h3>
+<p>Assign values to variables as follows:</p>
+<pre><code>// variable_name = variable_value ;
 
 var string name = "hello world";
 name = "kaan";
-```
+</code></pre>
 
-## Funcation Call
-```
-// funcation_name : param1 , param2 ;
+<h3>Function Calls</h3>
+<p>Call functions using the following syntax:</p>
+<pre><code>// function_name : param1 , param2 ;
 
 println: "hello world";
 print: "hello world";
-```
+</code></pre>
 
-### Funcation Defination
-```
-// func funcation_name ( parameter1 , parameter2 )
+<h3>Function Definition</h3>
+<p>Functions are defined using this structure:</p>
+<pre><code>// func function_name ( parameter1 , parameter2 )
 // {
-// } ;
+// }
 
 func example(x)
 {
   println: x;
-};
-```
+}
+</code></pre>
 
-### If/Else Statement
-```
-// if ( condition )
+<h3>Conditional Statements</h3>
+<p>Use if/else statements to control the flow of your program:</p>
+<pre><code>// if ( condition )
 // {
 // }
 // else
@@ -74,5 +78,43 @@ if (x == 10)
 else
 {
   println: "x is not 10";
-};
-```
+}
+</code></pre>
+
+<h2>Advanced Features</h2>
+<p>K-- also supports loops, user-defined types, and more advanced programming constructs:</p>
+
+<h3>Loops</h3>
+<p>Use loops to repeat code execution:</p>
+<pre><code>// while ( condition )
+// {
+// }
+
+var int i = 0;
+while (i < 10)
+{
+  println: i;
+  i = i + 1;
+}
+</code></pre>
+
+<h3>User-Defined Types</h3>
+<p>Create and use your own types:</p>
+<pre><code>// type typeName
+// {
+//     type propertyName;
+// }
+
+type Person
+{
+  string name;
+  int age;
+}
+
+var Person p;
+p.name = "John";
+p.age = 30;
+</code></pre>
+
+<h2>Conclusion</h2>
+<p>K-- is a versatile and efficient programming language suitable for a wide range of projects. Its flexibility and lightweight nature make it an excellent choice for developers looking for a customizable and quick-to-implement interpreted language.</p>
